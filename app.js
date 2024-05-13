@@ -1,3 +1,6 @@
+// password encryption
+const bcrypt = require('bcryptjs');
+
 // More securely stored URI to DB
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -76,19 +79,25 @@ app.get('/sign-up', (req, res) => res.render('sign-up-form'));
 // app POST for sign up form so we can add users to our database
 // REMEMBER in a real scenario, make sure to sanitize credentials
 app.post('/sign-up', async (req, res, next) => {
-    // Try to create a new user object, and save to DB
-    try {
-        const user = new User({
-            username: req.body.username,
-            password: req.body.password,
-        });
-        const result = await user.save();
-        // Success? Redirect to index
-        res.redirect('/');
-    } catch (err) {
-        // Fail? Toss err
-        return next(err);
-    }
+    // Encrypt password
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+        if (err) {
+            return next(err);
+        }
+        // Try to create a new user object with req username and encrypted password., and save to DB
+        try {
+            const user = new User({
+                username: req.body.username,
+                password: hashedPassword,
+            });
+            const result = await user.save();
+            // Success? Redirect to index
+            res.redirect('/');
+        } catch (err) {
+            // Fail? Toss err
+            return next(err);
+        }
+    });
 });
 
 /// Logging in ///
