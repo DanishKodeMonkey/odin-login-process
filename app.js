@@ -112,11 +112,13 @@ passport.use(
             if (!user) {
                 return done(null, false, { message: 'Incorrect username' });
             }
-            // match user.password against given password
-            if (user.password !== password) {
-                // password incorrect
+            // match user.password against given password using bcrypt match
+            const match = await bcrypt.compare(password, user.password);
+            if (!match) {
+                // Passwords did not match
                 return done(null, false, { message: 'Incorrect password' });
             }
+
             // Bot user and password match, success!
             return done(null, user);
         } catch (err) {
