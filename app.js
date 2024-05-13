@@ -16,13 +16,13 @@ const session = require('express-session');
 const passport = require('passport');
 
 // localStrategy
-const localStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 
 // Mongoose for MongoDB interaction
 const mongoose = require('mongoose');
 
 // Schema, for user account schema
-const Schema = mongoose.schema;
+const Schema = mongoose.Schema;
 
 // First, assign connection string
 const mongoDb = process.env.MONGO_URI;
@@ -63,19 +63,22 @@ app.use(express.urlencoded({ extended: false }));
 
 // get relevant views, assign URLs
 app.get('/', (req, res) => res.render('index'));
-app.get('sign-up', (req, res) => res.render('sign-up-form'));
+app.get('/sign-up', (req, res) => res.render('sign-up-form'));
 
 // app POST for sign up form so we can add users to our database
 // REMEMBER in a real scenario, make sure to sanitize credentials
 app.post('/sign-up', async (req, res, next) => {
+    // Try to create a new user object, and save to DB
     try {
         const user = new User({
             username: req.body.username,
             password: req.body.password,
         });
         const result = await user.save();
+        // Success? Redirect to index
         res.redirect('/');
     } catch (err) {
+        // Fail? Toss err
         return next(err);
     }
 });
